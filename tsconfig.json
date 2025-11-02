@@ -1,6 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "paths": {
+      "ngx-gen-ui": [
+        "projects/ngx-gen-ui/src/public-api",
+        "./dist/ngx-gen-ui"
+      ]
+    },
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
@@ -22,5 +28,19 @@
       "ES2022",
       "DOM"
     ]
-  }
+  },
+  "references": [
+    {
+      "path": "./projects/ngx-gen-ui/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/ngx-gen-ui/tsconfig.spec.json"
+    },
+    {
+      "path": "./projects/demo/tsconfig.app.json"
+    },
+    {
+      "path": "./projects/demo/tsconfig.spec.json"
+    }
+  ]
 }

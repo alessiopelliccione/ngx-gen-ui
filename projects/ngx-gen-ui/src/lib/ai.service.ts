@@ -1,19 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
-  GenerativeModel,
-  GenerationConfig,
   GenerateContentStreamResult,
+  GenerationConfig,
+  GenerativeModel,
   getGenerativeModel,
   getVertexAI
 } from '@firebase/vertexai-preview';
 
-import { environment } from '../environments/environment';
+import { AI_PROMPT_CONFIG } from './config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AiService {
+
+  private readonly config = inject(AI_PROMPT_CONFIG, {
+    optional: false
+  });
 
   private readonly model = this.initializeModel();
 
@@ -34,7 +38,7 @@ export class AiService {
 
       return result.response?.text() ?? '';
     } catch (error) {
-      console.error('Errore nella chiamata a Firebase AI:', error);
+      console.error('Error while calling Firebase AI:', error);
       throw error;
     }
   }
@@ -54,24 +58,21 @@ export class AiService {
         generationConfig
       });
     } catch (error) {
-      console.error(
-        'Errore nella generazione streaming tramite Firebase AI:',
-        error
-      );
+      console.error('Error during Firebase AI streaming generation:', error);
       throw error;
     }
   }
 
   private initializeModel(): GenerativeModel {
-    const firebaseConfig = environment.firebase;
-    if (!firebaseConfig?.projectId) {
+    const { firebaseOptions, model } = this.config;
+    if (!firebaseOptions?.projectId) {
       throw new Error('Firebase configuration is missing projectId');
     }
 
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const app = getApps().length ? getApp() : initializeApp(firebaseOptions);
     const vertexAI = getVertexAI(app);
 
-    const modelName = environment.firebaseVertexModel || 'gemini-1.5-flash';
+    const modelName = model || 'gemini-1.5-flash';
     return getGenerativeModel(vertexAI, { model: modelName });
   }
 }

@@ -16,6 +16,7 @@ interface RequestOptions {
   prompt: string | null;
   config: Partial<GenerationConfig> | null;
   streaming: boolean;
+  allowHtml: boolean;
 }
 
 interface ActiveRequest extends RequestOptions {
@@ -51,6 +52,16 @@ export class AiPromptDirective {
     transform: booleanAttribute
   });
 
+  readonly camelAllowHtml = input(false, {
+    alias: 'aiAllowHtml',
+    transform: booleanAttribute
+  });
+
+  readonly kebabAllowHtml = input(false, {
+    alias: 'ai-allow-html',
+    transform: booleanAttribute
+  });
+
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly aiService = inject(AiService);
@@ -58,7 +69,8 @@ export class AiPromptDirective {
   private readonly resolvedOptions = computed<RequestOptions>(() => ({
     prompt: this.kebabPrompt() || this.camelPrompt() || null,
     config: this.generationConfig() ?? this.generationConfigKebab() ?? null,
-    streaming: this.camelStream() || this.kebabStream()
+    streaming: this.camelStream() || this.kebabStream(),
+    allowHtml: this.camelAllowHtml() || this.kebabAllowHtml()
   }));
 
   private requestId = 0;
@@ -76,17 +88,18 @@ export class AiPromptDirective {
       this.lastSignature = signature;
 
       if (!options.prompt) {
-        this.setTextContent('');
+        this.renderContent('', options.allowHtml);
         return;
       }
 
       const currentId = ++this.requestId;
-      this.setTextContent('');
+      this.renderContent('', options.allowHtml);
 
       const request: ActiveRequest = {
         prompt: options.prompt,
         config: options.config,
-        streaming: options.streaming
+        streaming: options.streaming,
+        allowHtml: options.allowHtml
       };
 
       if (request.streaming) {
@@ -98,7 +111,7 @@ export class AiPromptDirective {
   }
 
   private async handleNonStreamingRequest(
-    { prompt, config }: ActiveRequest,
+    { prompt, config, allowHtml }: ActiveRequest,
     currentId: number
   ): Promise<void> {
     try {
@@ -109,14 +122,14 @@ export class AiPromptDirective {
       if (currentId !== this.requestId) {
         return;
       }
-      this.setTextContent(response ?? '');
+      this.renderContent(response ?? '', allowHtml);
     } catch (error) {
       this.handleRequestError(error, currentId);
     }
   }
 
   private async handleStreamingRequest(
-    { prompt, config }: ActiveRequest,
+    { prompt, config, allowHtml }: ActiveRequest,
     currentId: number
   ): Promise<void> {
     try {
@@ -144,7 +157,7 @@ export class AiPromptDirective {
           : chunkText;
 
         displayedText = addition ? displayedText + addition : chunkText;
-        this.setTextContent(displayedText);
+        this.renderContent(displayedText, allowHtml);
       }
 
       if (currentId !== this.requestId) {
@@ -155,26 +168,24 @@ export class AiPromptDirective {
       const finalText = this.extractText(finalResponse);
       const resolvedText =
         finalText && finalText.length >= displayedText.length ? finalText : displayedText;
-      this.setTextContent(resolvedText ?? '');
+      this.renderContent(resolvedText ?? '', allowHtml);
     } catch (error) {
       this.handleRequestError(error, currentId);
     }
   }
 
-  private createSignature({ prompt, config, streaming }: RequestOptions): string {
+  private createSignature({ prompt, config, streaming, allowHtml }: RequestOptions): string {
     return JSON.stringify({
       prompt: prompt ?? '',
       streaming,
-      config: config ?? null
+      config: config ?? null,
+      allowHtml
     });
   }
 
-  private setTextContent(content: string): void {
-    this.renderer.setProperty(
-      this.elementRef.nativeElement,
-      'textContent',
-      content
-    );
+  private renderContent(content: string, allowHtml: boolean): void {
+    const property = allowHtml ? 'innerHTML' : 'textContent';
+    this.renderer.setProperty(this.elementRef.nativeElement, property, content);
   }
 
   private extractText(source: unknown): string | null {
@@ -209,6 +220,6 @@ export class AiPromptDirective {
       return;
     }
     console.error('Error while generating AI content:', error);
-    this.setTextContent('');
+    this.renderContent('', this.resolvedOptions().allowHtml);
   }
 }
