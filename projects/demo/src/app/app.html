@@ -4,7 +4,7 @@
   <section>
     <h2 style="text-align: left;">Marketing headline</h2>
     <p
-      ai-prompt="Write a catchy English headline that invites users to try a free demo of an enterprise platform. Use at most 6 words."
+      ai-prompt="Write a catchy English headline (max 10 words) that invites users to try a free demo of an enterprise platform. Just headline as a response"
       [ai-generation]="{ temperature: 0.4 }"
       ai-stream
     ></p>
@@ -13,7 +13,7 @@
   <section>
     <h2 style="text-align: left;">Cyberpunk storytelling</h2>
     <p
-      ai-prompt="Tell a cyberpunk story set in futuristic Milan in the year 2085. Keep it under 70 words."
+      ai-prompt="Tell a short cyberpunk story set in futuristic Milan in the year 2085. Maximum 120 words."
       [ai-generation]="{ temperature: 0.7 }"
       ai-stream
     ></p>
@@ -22,50 +22,23 @@
   <section>
     <h2 style="text-align: left;">Current weather</h2>
     <p
-      ai-prompt="Give me the current weather in New York in one sentence under 15 words, include an approximate temperature."
+      ai-prompt="Give me the current weather in New York in one short sentence, including an approximate temperature in Celsius."
       [ai-generation]="{ temperature: 0.2 }"
-    ></p>
-  </section>
-
-  <section>
-    <h2 style="text-align: left;">Team building ideas</h2>
-    <p
-      ai-prompt="Suggest three creative ideas for a company team-building workshop. List them and keep each idea under 12 words."
-      [ai-generation]="{ temperature: 0.55 }"
-      ai-stream
-    ></p>
-  </section>
-
-  <section>
-    <h2 style="text-align: left;">Professional email</h2>
-    <p
-      ai-prompt="Write a professional email proposing a free product demo to a potential client. Keep it between 45 and 60 words."
-      [ai-generation]="{ temperature: 0.35 }"
-      ai-stream
     ></p>
   </section>
 
   <section>
     <h2 style="text-align: left;">Translation</h2>
     <p
-      ai-prompt="Translate the following sentence into Spanish, using a neutral tone: 'Welcome to our platform!'"
+      ai-prompt="Translate the following sentence into Spanish, using a neutral tone: 'Welcome to our platform!' Just translation as a response"
       [ai-generation]="{ temperature: 0.2 }"
-    ></p>
-  </section>
-
-  <section>
-    <h2 style="text-align: left;">FAQ generator</h2>
-    <p
-      ai-prompt="Generate 4 FAQ entries (Question and Answer) about an enterprise SaaS platform. Keep each answer under 20 words."
-      [ai-generation]="{ temperature: 0.3 }"
-      ai-stream
     ></p>
   </section>
 
   <section>
     <h2 style="text-align: left;">Personalized subheadline</h2>
     <p
-      ai-prompt="Write a subheadline for a user coming from LinkedIn Ads who is interested in cloud migration. Use a persuasive tone."
+      ai-prompt="Write a subheadline for a user coming from LinkedIn Ads who is interested in cloud migration. Use a persuasive tone. Just final phrase as a response"
       [ai-generation]="{ temperature: 0.5 }"
     ></p>
   </section>
@@ -75,24 +48,6 @@
     <p
       ai-prompt="Suggest an original idea for the product 'AI Dashboard' in one sentence."
       [ai-generation]="{ temperature: 0.6 }"
-    ></p>
-  </section>
-
-  <section>
-    <h2 style="text-align: left;">Safe HTML content</h2>
-    <p
-      ai-prompt="Generate a short HTML newsletter snippet with <h3>, <ul>, and <li> tags. Keep it friendly and under 60 words."
-      [ai-generation]="{ temperature: 0.45 }"
-      ai-stream
-      ai-allow-html
-    ></p>
-  </section>
-
-  <section>
-    <h2 style="text-align: left;">Error test</h2>
-    <p
-      ai-prompt="Try to generate content using a non-existent AI model."
-      [ai-generation]="{ model: 'does-not-exist' }"
     ></p>
   </section>
 </main>
