@@ -1,8 +1,9 @@
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
   GenerativeModel,
   GenerationConfig,
+  GenerateContentStreamResult,
   getGenerativeModel,
   getVertexAI
 } from '@firebase/vertexai-preview';
@@ -20,7 +21,6 @@ export class AiService {
     prompt: string,
     config?: Partial<GenerationConfig>
   ): Promise<string> {
-
     try {
       const generationConfig: GenerationConfig = {
         temperature: 0,
@@ -35,6 +35,29 @@ export class AiService {
       return result.response?.text() ?? '';
     } catch (error) {
       console.error('Errore nella chiamata a Firebase AI:', error);
+      throw error;
+    }
+  }
+
+  async streamPrompt(
+    prompt: string,
+    config?: Partial<GenerationConfig>
+  ): Promise<GenerateContentStreamResult> {
+    try {
+      const generationConfig: GenerationConfig = {
+        temperature: 0,
+        ...config
+      };
+
+      return await this.model.generateContentStream({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig
+      });
+    } catch (error) {
+      console.error(
+        'Errore nella generazione streaming tramite Firebase AI:',
+        error
+      );
       throw error;
     }
   }
