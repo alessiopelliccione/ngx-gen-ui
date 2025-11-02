@@ -2,6 +2,17 @@
   "name": "ngx-firebase-ai",
   "version": "0.0.0",
   "private": true,
+  "description": "Monorepo containing ngx-gen-ui, a lightweight Angular directive for streaming generative UI content with Firebase Vertex AI, plus a demo app.",
+  "author": "Alessio Pelliccione",
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "generative-ai",
+    "firebase",
+    "vertex-ai",
+    "directive",
+    "demo"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve demo",
