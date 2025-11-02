@@ -12,6 +12,16 @@ import { GenerationConfig } from '@firebase/vertexai-preview';
 
 import { AiService } from './ai.service';
 
+interface RequestOptions {
+  prompt: string | null;
+  config: Partial<GenerationConfig> | null;
+  streaming: boolean;
+}
+
+interface ActiveRequest extends RequestOptions {
+  prompt: string;
+}
+
 @Directive({
   selector: '[aiPrompt],[ai-prompt]',
   standalone: true
@@ -41,214 +51,158 @@ export class AiPromptDirective {
     transform: booleanAttribute
   });
 
-  private readonly normalizedPrompt = computed(() => {
-    const kebab = this.kebabPrompt();
-    const camel = this.camelPrompt();
-    return kebab || camel;
-  });
-
-  private readonly resolvedGenerationConfig = computed(
-    () => this.generationConfig() ?? this.generationConfigKebab() ?? null
-  );
-
-  private readonly streamingEnabled = computed(
-    () => (this.camelStream() || this.kebabStream())
-  );
-
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly aiService = inject(AiService);
 
+  private readonly resolvedOptions = computed<RequestOptions>(() => ({
+    prompt: this.kebabPrompt() || this.camelPrompt() || null,
+    config: this.generationConfig() ?? this.generationConfigKebab() ?? null,
+    streaming: this.camelStream() || this.kebabStream()
+  }));
+
   private requestId = 0;
-  private lastRequestSignature: string | null = null;
-  private readonly wordTypingDelay = 45;
+  // Tracks the last evaluated inputs so equal inputs don't trigger duplicate requests.
+  private lastSignature: string | null = null;
 
   constructor() {
     effect(() => {
-      const prompt = this.normalizedPrompt();
-      const generationConfig = this.resolvedGenerationConfig();
-      const streaming = this.streamingEnabled();
+      const options = this.resolvedOptions();
+      const signature = this.createSignature(options);
 
-      const signature = `${prompt ?? ''}__${streaming}__${
-        generationConfig ? JSON.stringify(generationConfig) : 'null'
-      }`;
-
-      if (this.lastRequestSignature === signature) {
+      if (this.lastSignature === signature) {
         return;
       }
-      this.lastRequestSignature = signature;
+      this.lastSignature = signature;
 
-      if (!prompt) {
-        this.renderer.setProperty(
-          this.elementRef.nativeElement,
-          'textContent',
-          ''
-        );
+      if (!options.prompt) {
+        this.setTextContent('');
         return;
       }
 
       const currentId = ++this.requestId;
+      this.setTextContent('');
 
-      this.renderer.setProperty(
-        this.elementRef.nativeElement,
-        'textContent',
-        ''
-      );
+      const request: ActiveRequest = {
+        prompt: options.prompt,
+        config: options.config,
+        streaming: options.streaming
+      };
 
-      if (streaming) {
-        this.handleStreamingRequest(prompt, generationConfig, currentId);
+      if (request.streaming) {
+        void this.handleStreamingRequest(request, currentId);
       } else {
-        this.handleNonStreamingRequest(prompt, generationConfig, currentId);
+        void this.handleNonStreamingRequest(request, currentId);
       }
     });
   }
 
-  private handleNonStreamingRequest(
-    prompt: string,
-    generationConfig: Partial<GenerationConfig> | null,
+  private async handleNonStreamingRequest(
+    { prompt, config }: ActiveRequest,
     currentId: number
-  ): void {
-    this.aiService
-      .sendPrompt(prompt, generationConfig ?? undefined)
-      .then((response) => {
-        if (currentId !== this.requestId) {
-          return;
-        }
-        this.renderer.setProperty(
-          this.elementRef.nativeElement,
-          'textContent',
-          response
-        );
-      })
-      .catch((error) => {
-        this.handleRequestError(error, currentId);
-      });
+  ): Promise<void> {
+    try {
+      const response = await this.aiService.sendPrompt(
+        prompt,
+        config ?? undefined
+      );
+      if (currentId !== this.requestId) {
+        return;
+      }
+      this.setTextContent(response ?? '');
+    } catch (error) {
+      this.handleRequestError(error, currentId);
+    }
   }
 
-  private handleStreamingRequest(
-    prompt: string,
-    generationConfig: Partial<GenerationConfig> | null,
+  private async handleStreamingRequest(
+    { prompt, config }: ActiveRequest,
     currentId: number
-  ): void {
-    this.aiService
-      .streamPrompt(prompt, generationConfig ?? undefined)
-      .then(async ({ stream, response }) => {
-        let bufferedText = '';
+  ): Promise<void> {
+    try {
+      const { stream, response } = await this.aiService.streamPrompt(
+        prompt,
+        config ?? undefined
+      );
 
-        try {
-          for await (const chunk of stream) {
-            if (currentId !== this.requestId) {
-              if (typeof stream.return === 'function') {
-                try {
-                  await stream.return(undefined);
-                } catch {
-                  // ignore generator completion errors
-                }
-              }
-              return;
-            }
+      const iterator = stream as AsyncIterableIterator<unknown>;
+      let latestText = '';
 
-            let chunkText = '';
-            try {
-              chunkText = chunk.text();
-            } catch (error) {
-              this.handleRequestError(error, currentId);
-              return;
-            }
-
-            if (!chunkText) {
-              continue;
-            }
-
-            const addition = chunkText.startsWith(bufferedText)
-              ? chunkText.slice(bufferedText.length)
-              : chunkText;
-            bufferedText = await this.typewriteAddition(
-              addition,
-              bufferedText,
-              currentId
-            );
-
-            if (!addition && chunkText !== bufferedText) {
-              bufferedText = chunkText;
-              this.renderer.setProperty(
-                this.elementRef.nativeElement,
-                'textContent',
-                bufferedText
-              );
-            }
-          }
-
-          const finalResponse = await response;
-          if (currentId !== this.requestId) {
-            return;
-          }
-
-          let finalText = bufferedText;
-          try {
-            finalText = finalResponse?.text() ?? bufferedText;
-          } catch (error) {
-            this.handleRequestError(error, currentId);
-            return;
-          }
-
-          this.renderer.setProperty(
-            this.elementRef.nativeElement,
-            'textContent',
-            finalText
-          );
-        } catch (error) {
-          this.handleRequestError(error, currentId);
+      for await (const chunk of iterator) {
+        if (currentId !== this.requestId) {
+          await this.closeStream(iterator);
+          return;
         }
-      })
-      .catch((error) => {
-        this.handleRequestError(error, currentId);
-      });
+
+        const chunkText = this.extractText(chunk);
+        if (!chunkText) {
+          continue;
+        }
+
+        latestText = chunkText;
+        this.setTextContent(latestText);
+      }
+
+      if (currentId !== this.requestId) {
+        return;
+      }
+
+      const finalResponse = await response;
+      const finalText = this.extractText(finalResponse) ?? latestText;
+      this.setTextContent(finalText ?? '');
+    } catch (error) {
+      this.handleRequestError(error, currentId);
+    }
+  }
+
+  private createSignature({ prompt, config, streaming }: RequestOptions): string {
+    return JSON.stringify({
+      prompt: prompt ?? '',
+      streaming,
+      config: config ?? null
+    });
+  }
+
+  private setTextContent(content: string): void {
+    this.renderer.setProperty(
+      this.elementRef.nativeElement,
+      'textContent',
+      content
+    );
+  }
+
+  private extractText(source: unknown): string | null {
+    if (!source || typeof source !== 'object') {
+      return null;
+    }
+
+    const text = (source as { text?: () => unknown }).text;
+    if (typeof text !== 'function') {
+      return null;
+    }
+
+    const value = text.call(source);
+    return typeof value === 'string' ? value : null;
+  }
+
+  private async closeStream(
+    iterator: AsyncIterableIterator<unknown>
+  ): Promise<void> {
+    if (typeof iterator.return !== 'function') {
+      return;
+    }
+    try {
+      await iterator.return(undefined);
+    } catch {
+      // Best-effort shutdown; errors will be surfaced elsewhere if relevant.
+    }
   }
 
   private handleRequestError(error: unknown, currentId: number): void {
     if (currentId !== this.requestId) {
       return;
     }
-    console.error('Errore durante la generazione del contenuto:', error);
-    this.renderer.setProperty(
-      this.elementRef.nativeElement,
-      'textContent',
-      ''
-    );
-  }
-
-  private async typewriteAddition(
-    addition: string,
-    bufferedText: string,
-    currentId: number
-  ): Promise<string> {
-    if (!addition) {
-      return bufferedText;
-    }
-
-    const tokens = addition.match(/\S+\s*/g) ?? [addition];
-
-    for (const token of tokens) {
-      if (currentId !== this.requestId) {
-        return bufferedText;
-      }
-
-      bufferedText += token;
-
-      this.renderer.setProperty(
-        this.elementRef.nativeElement,
-        'textContent',
-        bufferedText
-      );
-
-      await this.delay(this.wordTypingDelay);
-    }
-
-    return bufferedText;
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    console.error('Error while generating AI content:', error);
+    this.setTextContent('');
   }
 }
