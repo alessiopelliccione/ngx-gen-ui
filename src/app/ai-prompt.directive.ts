@@ -126,7 +126,7 @@ export class AiPromptDirective {
       );
 
       const iterator = stream as AsyncIterableIterator<unknown>;
-      let latestText = '';
+      let displayedText = '';
 
       for await (const chunk of iterator) {
         if (currentId !== this.requestId) {
@@ -139,8 +139,12 @@ export class AiPromptDirective {
           continue;
         }
 
-        latestText = chunkText;
-        this.setTextContent(latestText);
+        const addition = chunkText.startsWith(displayedText)
+          ? chunkText.slice(displayedText.length)
+          : chunkText;
+
+        displayedText = addition ? displayedText + addition : chunkText;
+        this.setTextContent(displayedText);
       }
 
       if (currentId !== this.requestId) {
@@ -148,8 +152,10 @@ export class AiPromptDirective {
       }
 
       const finalResponse = await response;
-      const finalText = this.extractText(finalResponse) ?? latestText;
-      this.setTextContent(finalText ?? '');
+      const finalText = this.extractText(finalResponse);
+      const resolvedText =
+        finalText && finalText.length >= displayedText.length ? finalText : displayedText;
+      this.setTextContent(resolvedText ?? '');
     } catch (error) {
       this.handleRequestError(error, currentId);
     }
