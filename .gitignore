@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.angular/
+.vscode/
+.idea/
+tmp/
+temp/
+*.log
+*.tmp
+
+environments/

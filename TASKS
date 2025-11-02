@@ -1,0 +1,6 @@
+1. Crea una struttura per un progetto angular semplicissimo e zoneless, mettendo solo una pagina con un paragrafo
+con dentro una
+direttiva es. <p ai-prompt="TESTO"></p> che chiama un servizio passando il testo del prompt a un servizio che ritorna RICEVUTO
+e la direttiva mette RICEVUTO dentro <p>RICEVUTO</p>
+
+2.

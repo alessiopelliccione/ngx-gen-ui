@@ -1,0 +1,25 @@
+<main>
+  <section class="card">
+    <h1>Direttiva <code>ai-prompt</code></h1>
+    <p class="lead">
+      Questo esempio mostra un singolo blocco di contenuto generato dinamicamente tramite Firebase AI.
+    </p>
+
+    <p
+      class="prompt-output"
+      ai-prompt="Scrivi una headline in italiano (massimo 10 parole) che inviti a provare una demo gratuita di una piattaforma enterprise."
+      [ai-generation]="{ temperature: 0.4 }"
+    ></p>
+  </section>
+
+  <section class="card">
+    <h2>Quick info</h2>
+    <p class="lead">Risposta sintetica sul meteo.</p>
+
+    <p
+      class="prompt-output"
+      ai-prompt="Dammi il meteo attuale di New York in una frase secca, in italiano, includendo temperatura approssimata."
+      [ai-generation]="{ temperature: 0.2 }"
+    ></p>
+  </section>
+</main>
