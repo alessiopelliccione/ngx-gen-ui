@@ -126,7 +126,7 @@ npm publish --access public
 
 ## Contributing
 
-Planning to collaborate? Read the lightweight guide in [COLLABORATION.md](./COLLABORATION.md).
+Planning to collaborate? Read the lightweight guide in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ---
 
