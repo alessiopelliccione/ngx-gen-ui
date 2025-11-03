@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/cover/cover.png" alt="ngx-gen-ui cover" width="320">
+  <img src="cover.png" alt="ngx-gen-ui cover" width="300">
 </p>
 
 <h1 align="center">ngx-gen-ui</h1>
