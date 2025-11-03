@@ -1,25 +1,59 @@
-<h1 align="center">
-  <img src="cover.png" alt="ngx-gen-ui cover" width="300">
-</h1>
+<p align="center">
+  <img src="docs/cover/cover.png" alt="ngx-gen-ui cover" width="320">
+</p>
 
-## ngx-gen-ui Monorepo
+<h1 align="center">ngx-gen-ui</h1>
 
-This repository contains:
+<p align="center">
+  Stream Firebase Vertex AI responses straight into Angular templates.
+</p>
 
-- `projects/ngx-gen-ui`: the publishable Angular library exposing an `AiPromptDirective` and `AiService` that stream content from Firebase Vertex AI.
-- `projects/demo`: a showcase application that consumes the library and demonstrates several prompt scenarios.
+<p align="center">
+  <a href="https://angular.dev/" target="_blank"><strong>Angular</strong></a> ·
+  <a href="https://firebase.google.com/products/vertex-ai" target="_blank"><strong>Firebase Vertex AI</strong></a>
+</p>
 
 ---
 
-## Using the Library in Your Project
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
-### 1. Install
+---
+
+## Overview
+
+This monorepo ships two projects:
+
+- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective` and `AiService` for streaming Vertex AI content.
+- `projects/demo`: a showcase app demonstrating different prompt scenarios using the library.
+
+The library focuses on lightweight integration and reactive streaming, making it simple to drop AI-powered text into any Angular view.
+
+---
+
+## Features
+
+- **Streamlined setup** — Add a directive, pass a prompt, watch content stream in real time.
+- **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
+- **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
+- **Angular-first DX** — Works with standalone APIs and cancellation built in.
+
+---
+
+## Quick Start
+
+### 1. Install dependencies
 
 ```bash
 npm install ngx-gen-ui firebase @firebase/vertexai-preview
 ```
 
-`firebase` and `@firebase/vertexai-preview` are peer dependencies used internally by the service.
+> `firebase` and `@firebase/vertexai-preview` are peer dependencies required by the service.
 
 ### 2. Provide Firebase + Vertex AI credentials
 
@@ -44,9 +78,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-> Replace the Firebase options with the credentials for the project that has Vertex AI access.
-
-### 3. Apply the directive in a template
+### 3. Apply the directive
 
 ```html
 <p
@@ -56,55 +88,34 @@ export const appConfig: ApplicationConfig = {
 ></p>
 ```
 
-Supported bindings:
+**Supported bindings**
 
 - `ai-prompt` / `aiPrompt`: prompt string.
 - `[ai-generation]` / `[aiGeneration]`: partial `GenerationConfig` (temperature, model, etc.).
 - `ai-stream` / `aiStream`: enable streaming updates.
 - `ai-allow-html` / `aiAllowHtml`: render streamed HTML safely when you trust the source.
 
-The directive automatically cancels in-flight requests when the prompt or config changes.
-
 ---
 
-## Working with this Repo
+## Development
 
 ### Prerequisites
-
 - Node.js 18+
 - npm
 - Firebase project with Vertex AI access (for the demo)
 
-### Install dependencies
+### Common scripts
 
 ```bash
-npm install
+npm install      # install dependencies
+npm start        # run the demo app -> http://localhost:4200
+npm run build    # build the demo app (dist/demo)
+npm run build:lib  # build the library (dist/ngx-gen-ui)
 ```
 
-### Run the demo app
+> Update `projects/demo/src/environments/environment.ts` with your Firebase credentials before streaming real data.
 
-```bash
-npm start
-# -> http://localhost:4200
-```
-
-Update `projects/demo/src/environments/environment.ts` with your Firebase credentials before streaming real data.
-
-### Build the demo
-
-```bash
-npm run build
-# output: dist/demo
-```
-
-### Build the library
-
-```bash
-npm run build:lib
-# output: dist/ngx-gen-ui
-```
-
-### Publish the library
+To publish the library:
 
 ```bash
 cd dist/ngx-gen-ui
@@ -113,8 +124,9 @@ npm publish --access public
 
 ---
 
-## 🤝 Contributing
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+## Contributing
+
+Planning to collaborate? Read the lightweight guide in [COLLABORATION.md](./COLLABORATION.md).
 
 ---
 
