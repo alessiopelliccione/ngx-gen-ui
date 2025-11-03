@@ -1,3 +1,5 @@
+![ngx-gen-ui cover](docs/cover/cover.png)
+
 ## ngx-gen-ui Monorepo
 
 This repository contains:
