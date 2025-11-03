@@ -1,51 +1,60 @@
-<main>
-  <h1>ngx-gen-ui directive demos</h1>
+<main class="demo-container">
+  <h1 class="demo-title">ngx-gen-ui directive demos</h1>
+  <p class="demo-subtitle">
+    Explore realtime AI content rendered through simple Angular directives.
+  </p>
 
-  <section>
-    <h2 style="text-align: left;">Marketing headline</h2>
+  <section class="demo-card">
+    <h2>Marketing headline</h2>
     <p
+      class="ai-output"
       ai-prompt="Write a catchy English headline (max 10 words) that invites users to try a free demo of an enterprise platform. Just headline as a response"
       [ai-generation]="{ temperature: 0.4 }"
-      ai-stream
+      ai-stream="true"
     ></p>
   </section>
 
-  <section>
-    <h2 style="text-align: left;">Cyberpunk storytelling</h2>
+  <section class="demo-card">
+    <h2>Cyberpunk storytelling</h2>
     <p
+      class="ai-output"
       ai-prompt="Tell a short cyberpunk story set in futuristic Milan in the year 2085. Maximum 120 words."
       [ai-generation]="{ temperature: 0.7 }"
-      ai-stream
+      ai-stream="true"
     ></p>
   </section>
 
-  <section>
-    <h2 style="text-align: left;">Current weather</h2>
+  <section class="demo-card">
+    <h2>Current weather</h2>
     <p
+      class="ai-output"
       ai-prompt="Give me the current weather in New York in one short sentence, including an approximate temperature in Celsius."
       [ai-generation]="{ temperature: 0.2 }"
     ></p>
   </section>
 
-  <section>
-    <h2 style="text-align: left;">Translation</h2>
+  <section class="demo-card">
+    <h2>Translation</h2>
     <p
+      class="ai-output"
       ai-prompt="Translate the following sentence into Spanish, using a neutral tone: 'Welcome to our platform!' Just translation as a response"
       [ai-generation]="{ temperature: 0.2 }"
     ></p>
   </section>
 
-  <section>
-    <h2 style="text-align: left;">Personalized subheadline</h2>
+  <section class="demo-card">
+    <h2>Personalized subheadline</h2>
     <p
+      class="ai-output"
       ai-prompt="Write a subheadline for a user coming from LinkedIn Ads who is interested in cloud migration. Use a persuasive tone. Just final phrase as a response"
       [ai-generation]="{ temperature: 0.5 }"
     ></p>
   </section>
 
-  <section>
-    <h2 style="text-align: left;">Product idea batch</h2>
+  <section class="demo-card">
+    <h2>Product idea batch</h2>
     <p
+      class="ai-output"
       ai-prompt="Suggest an original idea for the product 'AI Dashboard' in one sentence."
       [ai-generation]="{ temperature: 0.6 }"
     ></p>
