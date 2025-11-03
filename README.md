@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="docs/cover/cover.png" alt="ngx-gen-ui cover" width="300">
+  <img src="cover.png" alt="ngx-gen-ui cover" width="300">
 </h1>
 
 ## ngx-gen-ui Monorepo
