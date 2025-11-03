@@ -113,6 +113,11 @@ npm publish --access public
 
 ---
 
+## 🤝 Contributing
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+---
+
 ## License
 
 MIT © Alessio Pelliccione
