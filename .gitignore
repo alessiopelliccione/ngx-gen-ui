@@ -8,4 +8,8 @@ temp/
 *.log
 *.tmp
 
-environments/
+/.env
+
+# Angular environment files
+projects/demo/src/environments/environment.ts
+!projects/demo/src/environments/environment.example.ts
