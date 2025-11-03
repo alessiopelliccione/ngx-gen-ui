@@ -1,4 +1,6 @@
-![ngx-gen-ui cover](docs/cover/cover.png)
+<p align="center">
+  <img src="docs/cover.png" alt="ngx-gen-ui cover" width="600">
+</p>
 
 ## ngx-gen-ui Monorepo
 
