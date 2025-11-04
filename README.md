@@ -29,7 +29,7 @@
 
 This monorepo ships two projects:
 
-- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective` and `AiService` for streaming Vertex AI content.
+- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective`, `AiStructuredPromptDirective`, and the reusable `PromptEngineService` for working with Vertex AI.
 - `projects/demo`: a showcase app demonstrating different prompt scenarios using the library.
 
 The library focuses on lightweight integration and reactive streaming, making it simple to drop AI-powered text into any Angular view.
@@ -42,6 +42,7 @@ The library focuses on lightweight integration and reactive streaming, making it
 - **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
 - **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
 - **Structured responses** — Let the AI return structured markup (e.g. `["h1","Title"]`) and render it instantly.
+- **Reusable prompt engine** — Share the same prompt execution logic across directives or invoke it directly from your own services.
 - **Angular-first DX** — Works with standalone APIs and cancellation built in.
 
 ---
@@ -81,7 +82,22 @@ export const appConfig: ApplicationConfig = {
 
 ### 3. Apply the directive
 
+```ts
+// app.component.ts
+import { Component } from '@angular/core';
+import { AiPromptDirective, AiStructuredPromptDirective } from 'ngx-gen-ui';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [AiPromptDirective, AiStructuredPromptDirective],
+  templateUrl: './app.component.html'
+})
+export class AppComponent {}
+```
+
 ```html
+<!-- app.component.html -->
 <p
   ai-prompt="Write a friendly welcome description for our SaaS homepage."
   [ai-generation]="{ temperature: 0.4 }"
@@ -114,6 +130,18 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 - `ai-structured-prompt` / `aiStructuredPrompt`: prompt string.
 - `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial `GenerationConfig`.
 - `ai-structured-allow-html` / `aiStructuredAllowHtml`: allow HTML in fallback rendering when the response is not valid structured data.
+
+### 5. Advanced usage (optional)
+
+Need more control? Inject the `PromptEngineService` to run prompts directly in your own services or components:
+
+```ts
+import { inject } from '@angular/core';
+import { PromptEngineService } from 'ngx-gen-ui';
+
+const engine = inject(PromptEngineService);
+const result = await engine.generatePrompt({ prompt: 'Summarise this release note.' });
+```
 
 ---
 
