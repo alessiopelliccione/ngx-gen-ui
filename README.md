@@ -148,7 +148,7 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 ### 5. (Optional) Define a custom layout
 
 ```ts
-// hero.layout.ts
+// layouts.ts
 import { StructuredLayoutDefinition } from 'ngx-gen-ui';
 
 export const heroLayout: StructuredLayoutDefinition[] = [
@@ -156,6 +156,33 @@ export const heroLayout: StructuredLayoutDefinition[] = [
   { tag: 'h2', label: 'Hero sub-headline', required: false },
   { tag: 'h3', label: 'CTA label' },
   { tag: 'p', label: 'Supporting copy' }
+];
+
+export const featureLayout: StructuredLayoutDefinition[] = [
+  { tag: 'h2', label: 'Section title' },
+  {
+    tag: 'div',
+    label: 'Feature list',
+    children: [
+      {
+        tag: 'article',
+        label: 'Feature card',
+        children: [
+          { tag: 'h3', label: 'Feature name' },
+          { tag: 'p', label: 'Feature description' }
+        ]
+      },
+      {
+        tag: 'article',
+        label: 'Optional feature card',
+        required: false,
+        children: [
+          { tag: 'h3', label: 'Feature name' },
+          { tag: 'p', label: 'Feature description' }
+        ]
+      }
+    ]
+  }
 ];
 ```
 
@@ -165,11 +192,16 @@ export const heroLayout: StructuredLayoutDefinition[] = [
   ai-structured-prompt="Design a hero for an Italian tech startup with a strong CTA."
   [ai-structured-layout]="heroLayout"
 ></section>
+
+<section
+  ai-structured-prompt="Describe two killer capabilities of our AI analytics assistant."
+  [ai-structured-layout]="featureLayout"
+></section>
 ```
 
-The directive converts your layout definition into:
+The directive converts your layout definitions into:
 
-- A stricter `responseSchema` (only the tags you listed are allowed and attributes are hinted).
+- A stricter `responseSchema` (only the tags/attributes you list are allowed).
 - Prompt instructions that tell Gemini which elements must appear and in what order.
 
 ### 6. Advanced usage (optional)
