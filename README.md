@@ -135,13 +135,6 @@ npm run build:lib  # build the library (dist/ngx-gen-ui)
 
 > Update `projects/demo/src/environments/environment.ts` with your Firebase credentials before streaming real data.
 
-To publish the library:
-
-```bash
-cd dist/ngx-gen-ui
-npm publish --access public
-```
-
 ---
 
 ## Contributing
