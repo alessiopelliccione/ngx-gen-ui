@@ -10,12 +10,15 @@ import {
     PromptSignatureOptions
 } from '../services/prompt-engine.service';
 import {
-    STRUCTURED_RESPONSE_CONFIG,
+    createStructuredResponseConfig,
     prepareStructuredPrompt,
-    renderStructuredData
-} from '../utils/structured';
+    renderStructuredData,
+    StructuredLayoutDefinition
+} from '../utils/structured-data.utils';
 
-interface StructuredRequestOptions extends PromptDirectiveBaseOptions {}
+interface StructuredRequestOptions extends PromptDirectiveBaseOptions {
+    layout: StructuredLayoutDefinition[] | null;
+}
 
 @Directive({
     selector: '[aiStructuredPrompt],[ai-structured-prompt]'
@@ -35,9 +38,18 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         {alias: 'ai-structured-generation'}
     );
 
+    readonly structuredLayout = input<StructuredLayoutDefinition[] | null>(null, {
+        alias: 'aiStructuredLayout'
+    });
+
+    readonly structuredLayoutKebab = input<StructuredLayoutDefinition[] | null>(null, {
+        alias: 'ai-structured-layout'
+    });
+
     protected readonly options = computed<StructuredRequestOptions>(() => ({
         prompt: this.kebabPrompt() || this.camelPrompt() || null,
-        config: this.camelGeneration() ?? this.kebabGeneration() ?? null
+        config: this.camelGeneration() ?? this.kebabGeneration() ?? null,
+        layout: this.structuredLayout() ?? this.structuredLayoutKebab() ?? null
     }));
 
     constructor() {
@@ -54,14 +66,19 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
 
     protected override buildRequest(options: StructuredRequestOptions): PromptRequestOptions {
         const baseRequest = super.buildRequest(options);
+        const layout = options.layout ?? null;
+        const structuredConfig = createStructuredResponseConfig(layout);
+        const userConfig = baseRequest.config ?? undefined;
         const mergedConfig = {
-            ...STRUCTURED_RESPONSE_CONFIG,
-            ...(baseRequest.config ?? undefined)
-        } as Partial<GenerationConfig>;
+            ...userConfig,
+            ...structuredConfig,
+            responseMimeType: structuredConfig.responseMimeType,
+            responseSchema: structuredConfig.responseSchema
+        };
 
         return {
             ...baseRequest,
-            prompt: prepareStructuredPrompt(baseRequest.prompt),
+            prompt: prepareStructuredPrompt(baseRequest.prompt, layout),
             config: mergedConfig
         };
     }

@@ -46,6 +46,7 @@ The library focuses on lightweight integration and reactive streaming, making it
 - **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
 - **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
 - **Structured responses** — Let the AI return schema-validated markup (for example `{ "tag": "h1", "content": "Title" }`) and render it instantly.
+- **Layout guides** — Describe the element structure in TypeScript and let the directive enforce it via dynamic JSON schemas.
 - **Reusable prompt engine** — Share the same prompt execution logic across directives or invoke it directly from your own services.
 - **Angular-first DX** — Works with standalone APIs and cancellation built in.
 
@@ -142,8 +143,36 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 
 - `ai-structured-prompt` / `aiStructuredPrompt`: prompt string.
 - `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial `GenerationConfig`.
+- `[ai-structured-layout]` / `[aiStructuredLayout]`: optional TypeScript structure that the model must follow (converted into a JSON schema + prompt instructions).
 
-### 5. Advanced usage (optional)
+### 5. (Optional) Define a custom layout
+
+```ts
+// hero.layout.ts
+import { StructuredLayoutDefinition } from 'ngx-gen-ui';
+
+export const heroLayout: StructuredLayoutDefinition[] = [
+  { tag: 'h1', label: 'Hero headline' },
+  { tag: 'h2', label: 'Hero sub-headline', required: false },
+  { tag: 'h3', label: 'CTA label' },
+  { tag: 'p', label: 'Supporting copy' }
+];
+```
+
+```html
+<!-- app.component.html -->
+<section
+  ai-structured-prompt="Design a hero for an Italian tech startup with a strong CTA."
+  [ai-structured-layout]="heroLayout"
+></section>
+```
+
+The directive converts your layout definition into:
+
+- A stricter `responseSchema` (only the tags you listed are allowed and attributes are hinted).
+- Prompt instructions that tell Gemini which elements must appear and in what order.
+
+### 6. Advanced usage (optional)
 
 Need more control? Inject the `PromptEngineService` to run prompts directly in your own services or components. It exposes the same helpers used by the directives, including response schemas for structured prompts:
 

@@ -11,7 +11,7 @@ import {
     PromptEngineService,
     PromptRequestOptions,
     PromptSignatureOptions
-} from 'ngx-gen-ui';
+} from '../services/prompt-engine.service';
 
 export interface PromptDirectiveBaseOptions {
     prompt: string | null;

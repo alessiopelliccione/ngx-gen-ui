@@ -1,9 +1,15 @@
 export {
+    DEFAULT_STRUCTURED_RESPONSE_SCHEMA,
     STRUCTURED_PROMPT_SUFFIX,
-    STRUCTURED_RESPONSE_CONFIG,
-    STRUCTURED_RESPONSE_SCHEMA,
+    createStructuredResponseConfig,
+    prepareStructuredPrompt
+} from './structured/structured-config';
+
+export {renderStructuredData} from './structured/structured-renderer';
+
+export {
     StructuredElement,
     StructuredGenerationConfig,
-    prepareStructuredPrompt,
-    renderStructuredData
-} from './structured';
+    StructuredLayoutDefinition,
+    StructuredLayoutNode
+} from './structured/structured-types';
