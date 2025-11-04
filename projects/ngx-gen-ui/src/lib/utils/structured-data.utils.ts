@@ -2,7 +2,7 @@ import {Renderer2} from '@angular/core';
 
 const STRUCTURED_PROMPT_SUFFIX = `
 
-Restituisci esclusivamente un JSON valido che rappresenti un array bidimensionale di elementi HTML. Ogni elemento deve essere un array in cui il primo valore è il tag (es. "h1") e il secondo è il contenuto o l'attributo principale (es. "Titolo" oppure "image.jpg" per le immagini). Per i tag immagine puoi aggiungere un terzo valore come testo alternativo. Non includere testo aggiuntivo, descrizioni o backtick.`;
+Return only a valid JSON array of HTML elements. Each element must be an array where the first value is the tag name (for example "h1") and the second value is the main content or attribute (for example "Title" or "image.jpg" for images). For image tags you may add a third value with the alternative text. Do not include extra text, descriptions, or backticks.`;
 
 export function prepareStructuredPrompt(basePrompt: string): string {
     return `${basePrompt}${STRUCTURED_PROMPT_SUFFIX}`;

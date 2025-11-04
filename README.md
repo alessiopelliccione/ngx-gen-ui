@@ -91,17 +91,16 @@ export const appConfig: ApplicationConfig = {
 
 ### 4. Generate structured UI fragments (optional)
 
-Ask the model to respond with lightweight HTML instructions and let the directive render them for you.
+Use the dedicated directive when you want the AI to respond with lightweight HTML instructions that the library renders for you.
 
 ```html
 <div
   class="hero-preview"
-  ai-prompt="Design a short hero section for an Italian tech startup with a title, supporting sentence, and an image URL."
-  ai-structured-data
+  ai-structured-prompt="Design a short hero section for an Italian tech startup with a title, supporting sentence, and an image URL."
 ></div>
 ```
 
-> When `ai-structured-data` is enabled the directive automatically asks the AI for a JSON array like `[["h1","Title"],["p","Copy"],["img","/path.jpg","Alt"]]` and renders the DOM elements for you. Streaming is disabled in this mode to guarantee valid JSON.
+> The `ai-structured-prompt` directive automatically asks the AI for a JSON array like `[["h1","Title"],["p","Copy"],["img","/path.jpg","Alt"]]` and renders the DOM elements for you. Streaming is disabled in this mode to guarantee valid JSON.
 
 **Supported bindings**
 
@@ -109,7 +108,12 @@ Ask the model to respond with lightweight HTML instructions and let the directiv
 - `[ai-generation]` / `[aiGeneration]`: partial `GenerationConfig` (temperature, model, etc.).
 - `ai-stream` / `aiStream`: enable streaming updates.
 - `ai-allow-html` / `aiAllowHtml`: render streamed HTML safely when you trust the source.
-- `ai-structured-data` / `aiStructuredData`: request structured JSON output and render it as DOM elements (mutually exclusive with streaming).
+
+**Structured directive bindings**
+
+- `ai-structured-prompt` / `aiStructuredPrompt`: prompt string.
+- `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial `GenerationConfig`.
+- `ai-structured-allow-html` / `aiStructuredAllowHtml`: allow HTML in fallback rendering when the response is not valid structured data.
 
 ---
 

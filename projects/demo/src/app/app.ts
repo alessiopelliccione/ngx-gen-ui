@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 
-import { AiPromptDirective } from 'ngx-gen-ui';
+import { AiPromptDirective, AiStructuredPromptDirective } from 'ngx-gen-ui';
 
 @Component({
   selector: 'app-root',
-  imports: [AiPromptDirective],
+    imports: [AiPromptDirective, AiStructuredPromptDirective, AiStructuredPromptDirective],
   templateUrl: './app.html'
 })
 export class AppComponent {}
