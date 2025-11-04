@@ -11,12 +11,14 @@ import {
 import {GenerationConfig} from '@firebase/vertexai-preview';
 
 import {AiService} from './ai.service';
+import {prepareStructuredPrompt, renderStructuredData} from './structured-data.utils';
 
 interface RequestOptions {
     prompt: string | null;
     config: Partial<GenerationConfig> | null;
     streaming: boolean;
     allowHtml: boolean;
+    structuredData: boolean;
 }
 
 interface ActiveRequest extends RequestOptions {
@@ -61,6 +63,16 @@ export class AiPromptDirective {
         transform: booleanAttribute
     });
 
+    readonly camelStructuredData = input(false, {
+        alias: 'aiStructuredData',
+        transform: booleanAttribute
+    });
+
+    readonly kebabStructuredData = input(false, {
+        alias: 'ai-structured-data',
+        transform: booleanAttribute
+    });
+
     private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
     private readonly renderer = inject(Renderer2);
     private readonly aiService = inject(AiService);
@@ -69,7 +81,8 @@ export class AiPromptDirective {
         prompt: this.kebabPrompt() || this.camelPrompt() || null,
         config: this.generationConfig() ?? this.generationConfigKebab() ?? null,
         streaming: this.camelStream() || this.kebabStream(),
-        allowHtml: this.camelAllowHtml() || this.kebabAllowHtml()
+        allowHtml: this.camelAllowHtml() || this.kebabAllowHtml(),
+        structuredData: this.camelStructuredData() || this.kebabStructuredData()
     }));
 
     private requestId = 0;
@@ -87,50 +100,58 @@ export class AiPromptDirective {
             this.lastSignature = signature;
 
             if (!options.prompt) {
-                this.renderContent('', options.allowHtml);
+                this.renderResponse('', options);
                 return;
             }
 
             const currentId = ++this.requestId;
-            this.renderContent('', options.allowHtml);
+            this.renderResponse('', options);
 
             const request: ActiveRequest = {
                 prompt: options.prompt,
                 config: options.config,
                 streaming: options.streaming,
-                allowHtml: options.allowHtml
+                allowHtml: options.allowHtml,
+                structuredData: options.structuredData
             };
 
-            if (request.streaming) {
-                void this.handleStreamingRequest(request, currentId);
+            let finalRequest = request;
+
+            // Avoid streaming on structuredData
+            if (request.streaming && request.structuredData) {
+                console.warn(
+                    'Structured data generation is not compatible with streaming; falling back to non-streaming request.'
+                );
+                finalRequest = {...request, streaming: false};
+            }
+
+            if (finalRequest.streaming) {
+                void this.handleStreamingRequest(finalRequest, currentId);
             } else {
-                void this.handleNonStreamingRequest(request, currentId);
+                void this.handleNonStreamingRequest(finalRequest, currentId);
             }
         });
     }
 
-    private async handleNonStreamingRequest(
-        {prompt, config, allowHtml}: ActiveRequest,
-        currentId: number
-    ): Promise<void> {
+    private async handleNonStreamingRequest(request: ActiveRequest, currentId: number): Promise<void> {
+        const {prompt, config, structuredData} = request;
         try {
-            const response = await this.aiService.sendPrompt(
-                prompt,
-                config ?? undefined
-            );
+            const promptPayload = structuredData ? prepareStructuredPrompt(prompt) : prompt;
+            const response = await this.aiService.sendPrompt(promptPayload, config ?? undefined);
             if (currentId !== this.requestId) {
                 return;
             }
-            this.renderContent(response ?? '', allowHtml);
+            this.renderResponse(response ?? '', request);
         } catch (error) {
             this.handleRequestError(error, currentId);
         }
     }
 
     private async handleStreamingRequest(
-        {prompt, config, allowHtml}: ActiveRequest,
+        request: ActiveRequest,
         currentId: number
     ): Promise<void> {
+        const {prompt, config} = request;
         try {
             const {stream, response} = await this.aiService.streamPrompt(
                 prompt,
@@ -156,7 +177,7 @@ export class AiPromptDirective {
                     : chunkText;
 
                 displayedText = addition ? displayedText + addition : chunkText;
-                this.renderContent(displayedText, allowHtml);
+                this.renderResponse(displayedText, request);
             }
 
             if (currentId !== this.requestId) {
@@ -167,23 +188,40 @@ export class AiPromptDirective {
             const finalText = this.extractText(finalResponse);
             const resolvedText =
                 finalText && finalText.length >= displayedText.length ? finalText : displayedText;
-            this.renderContent(resolvedText ?? '', allowHtml);
+            this.renderResponse(resolvedText ?? '', request);
         } catch (error) {
             this.handleRequestError(error, currentId);
         }
     }
 
-    private createSignature({prompt, config, streaming, allowHtml}: RequestOptions): string {
+    private createSignature({
+        prompt,
+        config,
+        streaming,
+        allowHtml,
+        structuredData
+    }: RequestOptions): string {
         return JSON.stringify({
             prompt: prompt ?? '',
             streaming,
             config: config ?? null,
-            allowHtml
+            allowHtml,
+            structuredData: Boolean(structuredData)
         });
     }
 
-    private renderContent(content: string, allowHtml: boolean): void {
-        const property = allowHtml ? 'innerHTML' : 'textContent';
+    private renderResponse(content: string, options: RequestOptions): void {
+        if (options.structuredData) {
+            renderStructuredData(
+                this.renderer,
+                this.elementRef.nativeElement,
+                content,
+                options.allowHtml
+            );
+            return;
+        }
+
+        const property = options.allowHtml ? 'innerHTML' : 'textContent';
         this.renderer.setProperty(this.elementRef.nativeElement, property, content);
     }
 
@@ -219,6 +257,6 @@ export class AiPromptDirective {
             return;
         }
         console.error('Error while generating AI content:', error);
-        this.renderContent('', this.resolvedOptions().allowHtml);
+        this.renderResponse('', this.resolvedOptions());
     }
 }

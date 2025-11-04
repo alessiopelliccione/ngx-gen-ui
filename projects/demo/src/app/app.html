@@ -34,6 +34,16 @@
   </section>
 
   <section class="demo-card">
+    <h2>Structured hero mockup</h2>
+    <div
+      class="ai-output ai-output--stack"
+      ai-prompt="Design a micro hero for a landing page promoting a data assistant. Include a punchy headline, a short supporting paragraph, and the URL of a relevant hero illustration."
+      [ai-generation]="{ temperature: 0.3 }"
+      ai-structured-data="true"
+    ></div>
+  </section>
+
+  <section class="demo-card">
     <h2>Translation</h2>
     <p
       class="ai-output"

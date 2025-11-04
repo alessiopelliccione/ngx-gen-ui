@@ -41,6 +41,7 @@ The library focuses on lightweight integration and reactive streaming, making it
 - **Streamlined setup** — Add a directive, pass a prompt, watch content stream in real time.
 - **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
 - **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
+- **Structured responses** — Let the AI return structured markup (e.g. `["h1","Title"]`) and render it instantly.
 - **Angular-first DX** — Works with standalone APIs and cancellation built in.
 
 ---
@@ -88,12 +89,27 @@ export const appConfig: ApplicationConfig = {
 ></p>
 ```
 
+### 4. Generate structured UI fragments (optional)
+
+Ask the model to respond with lightweight HTML instructions and let the directive render them for you.
+
+```html
+<div
+  class="hero-preview"
+  ai-prompt="Design a short hero section for an Italian tech startup with a title, supporting sentence, and an image URL."
+  ai-structured-data
+></div>
+```
+
+> When `ai-structured-data` is enabled the directive automatically asks the AI for a JSON array like `[["h1","Title"],["p","Copy"],["img","/path.jpg","Alt"]]` and renders the DOM elements for you. Streaming is disabled in this mode to guarantee valid JSON.
+
 **Supported bindings**
 
 - `ai-prompt` / `aiPrompt`: prompt string.
 - `[ai-generation]` / `[aiGeneration]`: partial `GenerationConfig` (temperature, model, etc.).
 - `ai-stream` / `aiStream`: enable streaming updates.
 - `ai-allow-html` / `aiAllowHtml`: render streamed HTML safely when you trust the source.
+- `ai-structured-data` / `aiStructuredData`: request structured JSON output and render it as DOM elements (mutually exclusive with streaming).
 
 ---
 
