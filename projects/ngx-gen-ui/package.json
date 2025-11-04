@@ -1,13 +1,13 @@
 {
   "name": "ngx-gen-ui",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Lightweight Angular directive and service for streaming generative UI content via Firebase Vertex AI.",
   "author": "Alessio Pelliccione",
   "peerDependencies": {
-    "@angular/common": "^17.0.0",
-    "@angular/core": "^17.0.0",
-    "@firebase/ai": "^1.4.0",
-    "firebase": "^11.0.0"
+    "@angular/common": ">=17.0.0",
+    "@angular/core": ">=17.0.0",
+    "@firebase/ai": ">=1.4.0",
+    "firebase": ">=11.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
