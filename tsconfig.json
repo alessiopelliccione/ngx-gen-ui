@@ -3,7 +3,6 @@
   "compilerOptions": {
     "paths": {
       "ngx-gen-ui": [
-        "projects/ngx-gen-ui/src/public-api",
         "./dist/ngx-gen-ui"
       ]
     },

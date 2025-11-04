@@ -4,9 +4,10 @@ import {
     GenerateContentStreamResult,
     GenerationConfig,
     GenerativeModel,
+    VertexAIBackend,
+    getAI,
     getGenerativeModel,
-    getVertexAI
-} from '@firebase/vertexai-preview';
+} from '@firebase/ai';
 
 import {AI_PROMPT_CONFIG} from '../config/ai-prompt.config';
 
@@ -70,9 +71,12 @@ export class AiService {
         }
 
         const app = getApps().length ? getApp() : initializeApp(firebaseOptions);
-        const vertexAI = getVertexAI(app);
+        const location = this.config.location ?? undefined;
+        const ai = getAI(app, {
+            backend: new VertexAIBackend(location)
+        });
 
         const modelName = model || 'gemini-2.5-flash-lite';
-        return getGenerativeModel(vertexAI, {model: modelName});
+        return getGenerativeModel(ai, {model: modelName});
     }
 }

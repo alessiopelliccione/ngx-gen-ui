@@ -1,5 +1,5 @@
 import {Directive, computed, input} from '@angular/core';
-import {GenerationConfig} from '@firebase/vertexai-preview';
+import {GenerationConfig} from '@firebase/ai';
 
 import {
     PromptDirectiveBase,

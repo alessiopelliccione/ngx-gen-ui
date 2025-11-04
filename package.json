@@ -15,10 +15,14 @@
   ],
   "scripts": {
     "ng": "ng",
+    "prestart": "npm run build:lib",
     "start": "ng serve demo",
+    "prebuild": "npm run build:lib",
     "build": "ng build demo",
     "build:lib": "ng build ngx-gen-ui",
+    "prewatch": "npm run build:lib",
     "watch": "ng build demo --watch --configuration development",
+    "pretest": "npm run build:lib",
     "test": "ng test demo"
   },
   "dependencies": {
@@ -30,7 +34,7 @@
     "@angular/platform-browser": "^20.3.9",
     "@angular/platform-browser-dynamic": "^20.3.9",
     "@angular/router": "^20.3.9",
-    "@firebase/vertexai-preview": "^0.0.4",
+    "@firebase/ai": "^1.4.1",
     "firebase": "^11.0.2",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",

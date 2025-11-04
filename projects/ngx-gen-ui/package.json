@@ -6,7 +6,7 @@
   "peerDependencies": {
     "@angular/common": "^20.3.0",
     "@angular/core": "^20.3.0",
-    "@firebase/vertexai-preview": "^0.0.4",
+    "@firebase/ai": "^1.4.0",
     "firebase": "^11.0.0"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-import {GenerationConfig} from '@firebase/vertexai-preview';
+import {GenerationConfig} from '@firebase/ai';
 
 export interface StructuredElement {
     tag: string;

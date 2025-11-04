@@ -1,5 +1,5 @@
 import {Directive, booleanAttribute, computed, input} from '@angular/core';
-import {GenerationConfig} from '@firebase/vertexai-preview';
+import {GenerationConfig} from '@firebase/ai';
 
 import {PromptSignatureOptions} from '../services/prompt-engine.service';
 import {

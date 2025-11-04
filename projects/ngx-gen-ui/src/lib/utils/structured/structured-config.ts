@@ -1,3 +1,5 @@
+import {SchemaType, type SchemaRequest} from '@firebase/ai';
+
 import {
     StructuredGenerationConfig,
     StructuredLayoutDefinition,
@@ -25,41 +27,37 @@ Return only a valid JSON array. Each item must be an object that describes an HT
 - "attributes": optional object of HTML attributes (for example {"src": "...", "alt": "..."}).
 Do not include explanations or Markdown fences.`;
 
-export const DEFAULT_STRUCTURED_RESPONSE_SCHEMA = {
-    type: 'array',
+export const DEFAULT_STRUCTURED_RESPONSE_SCHEMA: SchemaRequest = {
+    type: SchemaType.ARRAY,
     items: {
-        type: 'object',
+        type: SchemaType.OBJECT,
         properties: {
             tag: {
-                type: 'string',
+                type: SchemaType.STRING,
                 description: 'HTML tag name such as h1, p, button, img.'
             },
             content: {
-                type: 'string',
+                type: SchemaType.STRING,
                 nullable: true,
                 description: 'Primary text content or value for the element.'
             },
             attributes: {
-                type: 'object',
+                type: SchemaType.OBJECT,
                 nullable: true,
-                properties: Object.fromEntries(
-                    DEFAULT_ATTRIBUTES.map((attribute) => [attribute, {type: 'string', nullable: true}])
-                )
+                properties: createAttributePropertyMap(DEFAULT_ATTRIBUTES)
             },
             children: {
-                type: 'array',
+                type: SchemaType.ARRAY,
                 nullable: true,
                 items: {
-                    type: 'object',
+                    type: SchemaType.OBJECT,
                     properties: {
-                        tag: {type: 'string'},
-                        content: {type: 'string', nullable: true},
+                        tag: {type: SchemaType.STRING},
+                        content: {type: SchemaType.STRING, nullable: true},
                         attributes: {
-                            type: 'object',
+                            type: SchemaType.OBJECT,
                             nullable: true,
-                            properties: Object.fromEntries(
-                                DEFAULT_ATTRIBUTES.map((attribute) => [attribute, {type: 'string', nullable: true}])
-                            )
+                            properties: createAttributePropertyMap(DEFAULT_ATTRIBUTES)
                         }
                     },
                     required: ['tag']
@@ -68,7 +66,7 @@ export const DEFAULT_STRUCTURED_RESPONSE_SCHEMA = {
         },
         required: ['tag']
     }
-} as const;
+};
 
 export function createStructuredResponseConfig(
     layout?: StructuredLayoutDefinition[] | null
@@ -94,42 +92,58 @@ function createStructuredResponseSchema(layout: StructuredLayoutDefinition[]) {
     const tags = Array.from(collectTags(layout));
     const attributes = Array.from(new Set<string>(collectAttributes(layout)));
 
-    const baseSchema = cloneSchema(DEFAULT_STRUCTURED_RESPONSE_SCHEMA) as {
-        items: {
-            properties: {
-                tag: Record<string, unknown>;
-                attributes: {properties: Record<string, {type: string; nullable: boolean}>};
-                children?: {
-                    items?: {
-                        properties: {
-                            tag: Record<string, unknown>;
-                            attributes?: {properties: Record<string, {type: string; nullable: boolean}>};
-                        };
-                    };
-                };
-            };
-        };
-    };
+    const baseSchema = cloneSchema(DEFAULT_STRUCTURED_RESPONSE_SCHEMA) as SchemaRequest;
+    const rootItemSchema = baseSchema.items as SchemaRequest;
+    const rootProperties = (rootItemSchema.properties ?? {}) as Record<string, SchemaRequest>;
 
-    if (tags.length) {
-        (baseSchema.items.properties.tag as Record<string, unknown>)['enum'] = tags;
+    if (tags.length && rootProperties['tag']) {
+        (rootProperties['tag'] as Record<string, unknown>)['enum'] = tags;
     }
 
     if (attributes.length) {
         const attributeTargets = [
-            baseSchema.items.properties.attributes.properties,
-            baseSchema.items.properties.children?.items?.properties?.attributes?.properties
-        ].filter(Boolean) as Array<Record<string, {type: string; nullable: boolean}>>;
+            extractAttributeProperties(rootItemSchema),
+            extractAttributeProperties(rootProperties['children']?.items as SchemaRequest | undefined)
+        ].filter(Boolean) as Array<Record<string, SchemaRequest>>;
 
         for (const propertyMap of attributeTargets) {
             for (const attribute of attributes) {
                 const normalized = attribute === 'aria-label' ? 'ariaLabel' : attribute;
-                propertyMap[normalized] = {type: 'string', nullable: true};
+                if (!propertyMap[normalized]) {
+                    propertyMap[normalized] = {
+                        type: SchemaType.STRING,
+                        nullable: true
+                    };
+                }
             }
         }
     }
 
     return baseSchema;
+}
+
+function createAttributePropertyMap(attributes: readonly string[]): Record<string, SchemaRequest> {
+    const map: Record<string, SchemaRequest> = {};
+    for (const attribute of attributes) {
+        const normalized = attribute === 'aria-label' ? 'ariaLabel' : attribute;
+        map[normalized] = {
+            type: SchemaType.STRING,
+            nullable: true
+        };
+    }
+    return map;
+}
+
+function extractAttributeProperties(schema?: SchemaRequest): Record<string, SchemaRequest> | undefined {
+    if (!schema || schema.type !== SchemaType.OBJECT) {
+        return undefined;
+    }
+    const properties = schema.properties as Record<string, SchemaRequest> | undefined;
+    const attributesSchema = properties?.['attributes'];
+    if (!attributesSchema || attributesSchema.type !== SchemaType.OBJECT) {
+        return undefined;
+    }
+    return attributesSchema.properties as Record<string, SchemaRequest> | undefined;
 }
 
 function collectTags(layout: StructuredLayoutDefinition[]): Set<string> {

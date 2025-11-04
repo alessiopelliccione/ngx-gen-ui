@@ -33,7 +33,7 @@
 
 This monorepo ships two projects:
 
-- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective`, `AiStructuredPromptDirective`, and the reusable `PromptEngineService` for working with Vertex AI.
+- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective`, `AiStructuredPromptDirective`, and the reusable `PromptEngineService` for working with Firebase Vertex AI.
 - `projects/demo`: a showcase app demonstrating different prompt scenarios using the library.
 
 The library focuses on lightweight integration and reactive streaming, making it simple to drop AI-powered text into any Angular view.
@@ -57,10 +57,10 @@ The library focuses on lightweight integration and reactive streaming, making it
 ### 1. Install dependencies
 
 ```bash
-npm install ngx-gen-ui firebase @firebase/vertexai-preview
+npm install ngx-gen-ui firebase @firebase/ai
 ```
 
-> `firebase` and `@firebase/vertexai-preview` are peer dependencies required by the service.
+> `firebase` and `@firebase/ai` are peer dependencies required by the service.
 
 ### 2. Provide Firebase + Vertex AI credentials
 
@@ -79,7 +79,8 @@ export const appConfig: ApplicationConfig = {
         appId: 'YOUR_APP_ID',
         authDomain: 'YOUR_AUTH_DOMAIN'
       },
-      model: 'gemini-2.5-flash-lite' // optional, defaults to gemini-2.5-flash-lite
+      model: 'gemini-2.5-flash-lite', // optional, defaults to gemini-2.5-flash-lite
+      location: 'us-central1' // optional, defaults to us-central1
     })
   ]
 };

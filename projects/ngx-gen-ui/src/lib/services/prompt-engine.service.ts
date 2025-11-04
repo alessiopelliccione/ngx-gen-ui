@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {GenerationConfig} from '@firebase/vertexai-preview';
+import {GenerationConfig} from '@firebase/ai';
 
 import {AiService} from './ai.service';
 

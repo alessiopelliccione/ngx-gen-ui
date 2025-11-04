@@ -4,6 +4,7 @@ import {FirebaseOptions} from 'firebase/app';
 export interface AiPromptConfig {
     firebaseOptions: FirebaseOptions;
     model?: string;
+    location?: string;
 }
 
 export const AI_PROMPT_CONFIG = new InjectionToken<AiPromptConfig>(
