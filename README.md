@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/ngx-gen-ui" target="_blank">
+    <img src="https://img.shields.io/npm/v/ngx-gen-ui.svg" alt="npm package" />
+  </a>
+  <br/>
   <a href="https://angular.dev/" target="_blank"><strong>Angular</strong></a> ·
   <a href="https://firebase.google.com/products/vertex-ai" target="_blank"><strong>Firebase Vertex AI</strong></a>
 </p>
@@ -41,7 +45,7 @@ The library focuses on lightweight integration and reactive streaming, making it
 - **Streamlined setup** — Add a directive, pass a prompt, watch content stream in real time.
 - **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
 - **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
-- **Structured responses** — Let the AI return structured markup (e.g. `["h1","Title"]`) and render it instantly.
+- **Structured responses** — Let the AI return schema-validated markup (for example `{ "tag": "h1", "content": "Title" }`) and render it instantly.
 - **Reusable prompt engine** — Share the same prompt execution logic across directives or invoke it directly from your own services.
 - **Angular-first DX** — Works with standalone APIs and cancellation built in.
 
@@ -74,7 +78,7 @@ export const appConfig: ApplicationConfig = {
         appId: 'YOUR_APP_ID',
         authDomain: 'YOUR_AUTH_DOMAIN'
       },
-      model: 'gemini-2.0-flash' // optional, defaults to gemini-1.5-flash
+      model: 'gemini-2.5-flash-lite' // optional, defaults to gemini-2.5-flash-lite
     })
   ]
 };
@@ -116,7 +120,17 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 ></div>
 ```
 
-> The `ai-structured-prompt` directive automatically asks the AI for a JSON array like `[["h1","Title"],["p","Copy"],["img","/path.jpg","Alt"]]` and renders the DOM elements for you. Streaming is disabled in this mode to guarantee valid JSON.
+> The `ai-structured-prompt` directive automatically asks the AI for a JSON array like:
+>
+> ```json
+> [
+>   { "tag": "h1", "content": "Hero headline" },
+>   { "tag": "p", "content": "Supporting copy in one short sentence." },
+>   { "tag": "img", "attributes": { "src": "https://example.com/hero.jpg", "alt": "Hero illustration" } }
+> ]
+> ```
+>
+> The library requests the response in `application/json` using a response schema to ensure the payload is always valid. Streaming is disabled in this mode to guarantee the JSON contract.
 
 **Supported bindings**
 
@@ -133,7 +147,7 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 
 ### 5. Advanced usage (optional)
 
-Need more control? Inject the `PromptEngineService` to run prompts directly in your own services or components:
+Need more control? Inject the `PromptEngineService` to run prompts directly in your own services or components. It exposes the same helpers used by the directives, including response schemas for structured prompts:
 
 ```ts
 import { inject } from '@angular/core';

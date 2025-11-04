@@ -9,7 +9,11 @@ import {
     PromptRequestOptions,
     PromptSignatureOptions
 } from '../services/prompt-engine.service';
-import {prepareStructuredPrompt, renderStructuredData} from '../utils/structured-data.utils';
+import {
+    STRUCTURED_RESPONSE_CONFIG,
+    prepareStructuredPrompt,
+    renderStructuredData
+} from '../utils/structured';
 
 interface StructuredRequestOptions extends PromptDirectiveBaseOptions {}
 
@@ -62,9 +66,15 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
 
     protected override buildRequest(options: StructuredRequestOptions): PromptRequestOptions {
         const baseRequest = super.buildRequest(options);
+        const mergedConfig = {
+            ...STRUCTURED_RESPONSE_CONFIG,
+            ...(baseRequest.config ?? undefined)
+        } as Partial<GenerationConfig>;
+
         return {
             ...baseRequest,
-            prompt: prepareStructuredPrompt(baseRequest.prompt)
+            prompt: prepareStructuredPrompt(baseRequest.prompt),
+            config: mergedConfig
         };
     }
 
@@ -75,8 +85,9 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         const request = this.buildRequest(options);
         const response = await this.directiveService.generatePrompt(request, controller.signal);
 
-        if (this.isAborted(controller)) return;
-
+        if (this.isAborted(controller)) {
+            return;
+        }
 
         this.renderResult(response ?? '', options);
     }
@@ -99,7 +110,9 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         options: StructuredRequestOptions,
         controller: AbortController
     ): void {
-        if (this.isAborted(controller)) return;
+        if (this.isAborted(controller)) {
+            return;
+        }
         console.error('Error while generating structured AI content:', error);
         this.renderEmpty(options);
     }

@@ -72,7 +72,7 @@ export class AiService {
         const app = getApps().length ? getApp() : initializeApp(firebaseOptions);
         const vertexAI = getVertexAI(app);
 
-        const modelName = model || 'gemini-2.5-flash';
+        const modelName = model || 'gemini-2.5-flash-lite';
         return getGenerativeModel(vertexAI, {model: modelName});
     }
 }
