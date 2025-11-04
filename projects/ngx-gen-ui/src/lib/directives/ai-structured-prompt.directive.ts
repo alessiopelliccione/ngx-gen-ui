@@ -1,4 +1,4 @@
-import {Directive, booleanAttribute, computed, input} from '@angular/core';
+import {Directive, computed, input} from '@angular/core';
 import {GenerationConfig} from '@firebase/vertexai-preview';
 
 import {
@@ -35,20 +35,9 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         {alias: 'ai-structured-generation'}
     );
 
-    readonly camelAllowHtml = input(false, {
-        alias: 'aiStructuredAllowHtml',
-        transform: booleanAttribute
-    });
-
-    readonly kebabAllowHtml = input(false, {
-        alias: 'ai-structured-allow-html',
-        transform: booleanAttribute
-    });
-
     protected readonly options = computed<StructuredRequestOptions>(() => ({
         prompt: this.kebabPrompt() || this.camelPrompt() || null,
-        config: this.camelGeneration() ?? this.kebabGeneration() ?? null,
-        allowHtml: this.camelAllowHtml() || this.kebabAllowHtml()
+        config: this.camelGeneration() ?? this.kebabGeneration() ?? null
     }));
 
     constructor() {
@@ -59,8 +48,7 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         return {
             prompt: options.prompt,
             config: options.config,
-            streaming: false,
-            allowHtml: options.allowHtml
+            streaming: false
         };
     }
 
@@ -96,8 +84,7 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
         renderStructuredData(
             this.renderer,
             this.elementRef.nativeElement,
-            content,
-            options.allowHtml
+            content
         );
     }
 

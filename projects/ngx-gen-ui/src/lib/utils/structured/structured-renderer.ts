@@ -6,8 +6,7 @@ import {parseStructuredContent} from './structured-parser';
 export function renderStructuredData(
     renderer: Renderer2,
     container: HTMLElement,
-    rawContent: string,
-    allowHtml: boolean
+    rawContent: string
 ): void {
     clearContainer(renderer, container);
 
@@ -20,12 +19,12 @@ export function renderStructuredData(
         console.warn(
             'AI response could not be parsed as structured data; falling back to plain text rendering.'
         );
-        renderFallback(renderer, container, rawContent, allowHtml);
+        renderFallback(renderer, container, rawContent);
         return;
     }
 
     for (const entry of parsed) {
-        const element = renderElement(renderer, entry, allowHtml);
+        const element = renderElement(renderer, entry);
         if (element) {
             renderer.appendChild(container, element);
         }
@@ -34,8 +33,7 @@ export function renderStructuredData(
 
 function renderElement(
     renderer: Renderer2,
-    entry: StructuredElement,
-    allowHtml: boolean
+    entry: StructuredElement
 ): HTMLElement | null {
     const tag = entry.tag?.trim();
     if (!tag) {
@@ -66,18 +64,14 @@ function renderElement(
 
     if (entry.children.length > 0) {
         for (const child of entry.children) {
-            const childElement = renderElement(renderer, child, allowHtml);
+            const childElement = renderElement(renderer, child);
             if (childElement) {
                 renderer.appendChild(element, childElement);
             }
         }
     } else if (entry.content && normalizedTag !== 'img') {
-        if (allowHtml) {
-            renderer.setProperty(element, 'innerHTML', entry.content);
-        } else {
-            const textNode = renderer.createText(entry.content);
-            renderer.appendChild(element, textNode);
-        }
+        const textNode = renderer.createText(entry.content);
+        renderer.appendChild(element, textNode);
     }
 
     return element;
@@ -86,11 +80,9 @@ function renderElement(
 function renderFallback(
     renderer: Renderer2,
     container: HTMLElement,
-    content: string,
-    allowHtml: boolean
+    content: string
 ): void {
-    const property = allowHtml ? 'innerHTML' : 'textContent';
-    renderer.setProperty(container, property, content);
+    renderer.setProperty(container, 'textContent', content);
 }
 
 function clearContainer(renderer: Renderer2, container: HTMLElement): void {

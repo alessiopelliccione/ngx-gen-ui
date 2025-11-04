@@ -12,7 +12,6 @@ export interface PromptSignatureOptions {
     prompt: string | null;
     config: Partial<GenerationConfig> | null;
     streaming: boolean;
-    allowHtml: boolean;
 }
 
 export interface PromptStreamHandlers {
@@ -31,14 +30,12 @@ export class PromptEngineService {
     createSignature({
         prompt,
         config,
-        streaming,
-        allowHtml
+        streaming
     }: PromptSignatureOptions): string {
         return JSON.stringify({
             prompt: prompt ?? '',
             config: config ?? null,
-            streaming,
-            allowHtml
+            streaming
         });
     }
 

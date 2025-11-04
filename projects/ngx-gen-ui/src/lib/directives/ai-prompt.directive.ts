@@ -39,21 +39,10 @@ export class AiPromptDirective extends PromptDirectiveBase<RequestOptions> {
         transform: booleanAttribute
     });
 
-    readonly camelAllowHtml = input(false, {
-        alias: 'aiAllowHtml',
-        transform: booleanAttribute
-    });
-
-    readonly kebabAllowHtml = input(false, {
-        alias: 'ai-allow-html',
-        transform: booleanAttribute
-    });
-
     protected readonly options = computed<RequestOptions>(() => ({
         prompt: this.kebabPrompt() || this.camelPrompt() || null,
         config: this.generationConfig() ?? this.generationConfigKebab() ?? null,
-        streaming: this.camelStream() || this.kebabStream(),
-        allowHtml: this.camelAllowHtml() || this.kebabAllowHtml()
+        streaming: this.camelStream() || this.kebabStream()
     }));
 
     constructor() {
@@ -64,8 +53,7 @@ export class AiPromptDirective extends PromptDirectiveBase<RequestOptions> {
         return {
             prompt: options.prompt,
             config: options.config,
-            streaming: options.streaming,
-            allowHtml: options.allowHtml
+            streaming: options.streaming
         };
     }
 

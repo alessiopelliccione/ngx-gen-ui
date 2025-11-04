@@ -11,12 +11,11 @@ import {
     PromptEngineService,
     PromptRequestOptions,
     PromptSignatureOptions
-} from '../services/prompt-engine.service';
+} from 'ngx-gen-ui';
 
 export interface PromptDirectiveBaseOptions {
     prompt: string | null;
     config: Partial<GenerationConfig> | null;
-    allowHtml: boolean;
 }
 
 export abstract class PromptDirectiveBase<TOptions extends PromptDirectiveBaseOptions> {
@@ -79,8 +78,8 @@ export abstract class PromptDirectiveBase<TOptions extends PromptDirectiveBaseOp
         };
     }
 
-    protected renderResult(content: string, options: TOptions): void {
-        this.renderTextContent(content, options.allowHtml);
+    protected renderResult(content: string, _options: TOptions): void {
+        this.renderTextContent(content);
     }
 
     protected renderInitial(options: TOptions): void {
@@ -95,9 +94,8 @@ export abstract class PromptDirectiveBase<TOptions extends PromptDirectiveBaseOp
         return controller.signal.aborted;
     }
 
-    protected renderTextContent(content: string, allowHtml: boolean): void {
-        const property = allowHtml ? 'innerHTML' : 'textContent';
-        this.renderer.setProperty(this.elementRef.nativeElement, property, content);
+    protected renderTextContent(content: string): void {
+        this.renderer.setProperty(this.elementRef.nativeElement, 'textContent', content);
     }
 
     protected handleError(

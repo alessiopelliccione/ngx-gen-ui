@@ -137,13 +137,11 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 - `ai-prompt` / `aiPrompt`: prompt string.
 - `[ai-generation]` / `[aiGeneration]`: partial `GenerationConfig` (temperature, model, etc.).
 - `ai-stream` / `aiStream`: enable streaming updates.
-- `ai-allow-html` / `aiAllowHtml`: render streamed HTML safely when you trust the source.
 
 **Structured directive bindings**
 
 - `ai-structured-prompt` / `aiStructuredPrompt`: prompt string.
 - `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial `GenerationConfig`.
-- `ai-structured-allow-html` / `aiStructuredAllowHtml`: allow HTML in fallback rendering when the response is not valid structured data.
 
 ### 5. Advanced usage (optional)
 
