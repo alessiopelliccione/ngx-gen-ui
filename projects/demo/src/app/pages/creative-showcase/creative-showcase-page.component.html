@@ -1,0 +1,15 @@
+<main class="demo-container">
+  <h1 class="demo-title">AI creative UI lab</h1>
+  <p class="demo-subtitle">
+    Ask the model to paint an entire micro landing page with inline CSS and HTML nodes.
+  </p>
+
+  <section class="demo-card">
+    <h2>Generative mini-site</h2>
+    <div
+      class="ai-output ai-output--stack creative-canvas"
+      ai-structured-prompt="Design a bold single-screen landing page for a fictional product called 'Aurora Synth'. Include at least: a hero area with gradient background and layered typography, a features row, a testimonial card, and a pricing call-to-action footer. Feel free to add extra decorative elements. Use nested HTML as needed and add rich inline CSS on every element (backgrounds, layout, spacing, gradients, shadows, fonts). Return only the JSON array structure expected by the consumer."
+      [ai-structured-generation]="{ temperature: 0.8 }"
+    ></div>
+  </section>
+</main>
