@@ -3,14 +3,14 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 
-import { provideAiPromptConfig } from 'ngx-gen-ui';
+import { provideFirebaseAiAdapter } from 'ngx-gen-ui';
 
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideAiPromptConfig({
+    ...provideFirebaseAiAdapter({
       firebaseOptions: environment.firebase,
       model: environment.firebaseVertexModel
     })

@@ -1,4 +1,4 @@
-import {GenerationConfig} from '@firebase/ai';
+import {AiGenerationConfig} from '../../services/ai-adapter';
 
 export interface StructuredElement {
     tag: string;
@@ -17,7 +17,7 @@ export interface StructuredLayoutNode {
 
 export type StructuredLayoutDefinition = string | StructuredLayoutNode;
 
-export type StructuredGenerationConfig = Partial<GenerationConfig> & {
+export type StructuredGenerationConfig = Partial<AiGenerationConfig> & {
     responseMimeType?: string;
     responseSchema?: unknown;
 };

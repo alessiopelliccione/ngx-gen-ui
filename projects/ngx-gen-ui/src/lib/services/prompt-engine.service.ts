@@ -1,16 +1,16 @@
 import {Injectable} from '@angular/core';
-import {GenerationConfig} from '@firebase/ai';
 
 import {AiService} from './ai.service';
+import {AiGenerationConfig} from './ai-adapter';
 
 export interface PromptRequestOptions {
     prompt: string;
-    config?: Partial<GenerationConfig> | null;
+    config?: Partial<AiGenerationConfig> | null;
 }
 
 export interface PromptSignatureOptions {
     prompt: string | null;
-    config: Partial<GenerationConfig> | null;
+    config: Partial<AiGenerationConfig> | null;
     streaming: boolean;
 }
 
@@ -68,21 +68,26 @@ export class PromptEngineService {
         handlers: PromptStreamHandlers,
         signal?: AbortSignal
     ): Promise<string> {
-        const {stream, response} = await this.aiService.streamPrompt(
+        const {stream, finalResponse} = await this.aiService.streamPrompt(
             request.prompt,
             request.config ?? undefined
         );
 
-        const iterator = stream as AsyncIterableIterator<unknown>;
+        const iterator = stream;
         let displayedText = '';
 
-        for await (const chunk of iterator) {
+        while (true) {
             if (signal?.aborted) {
                 await this.closeStream(iterator);
                 return '';
             }
 
-            const chunkText = this.extractText(chunk);
+            const {done, value} = await iterator.next();
+            if (done) {
+                break;
+            }
+
+            const chunkText = typeof value === 'string' ? value : '';
             if (!chunkText) {
                 continue;
             }
@@ -96,30 +101,16 @@ export class PromptEngineService {
         }
 
         if (signal?.aborted) {
+            await this.closeStream(iterator);
             return '';
         }
 
-        const finalResponse = await response;
-        const finalText = this.extractText(finalResponse);
+        const finalText = await finalResponse;
         return finalText && finalText.length >= displayedText.length ? finalText : displayedText;
     }
 
-    private extractText(source: unknown): string | null {
-        if (!source || typeof source !== 'object') {
-            return null;
-        }
-
-        const text = (source as { text?: () => unknown }).text;
-        if (typeof text !== 'function') {
-            return null;
-        }
-
-        const value = text.call(source);
-        return typeof value === 'string' ? value : null;
-    }
-
     private async closeStream(
-        iterator: AsyncIterableIterator<unknown>
+        iterator: AsyncIterableIterator<string>
     ): Promise<void> {
         if (typeof iterator.return !== 'function') {
             return;

@@ -1,11 +1,11 @@
 import {Directive, booleanAttribute, computed, input} from '@angular/core';
-import {GenerationConfig} from '@firebase/ai';
 
 import {PromptSignatureOptions} from '../services/prompt-engine.service';
 import {
     PromptDirectiveBase,
     PromptDirectiveBaseOptions
 } from './prompt-directive.base';
+import {AiGenerationConfig} from '../services/ai-adapter';
 
 interface RequestOptions extends PromptDirectiveBaseOptions {
     streaming: boolean;
@@ -20,11 +20,11 @@ export class AiPromptDirective extends PromptDirectiveBase<RequestOptions> {
 
     readonly kebabPrompt = input('', {alias: 'ai-prompt'});
 
-    readonly generationConfig = input<Partial<GenerationConfig> | null>(null, {
+    readonly generationConfig = input<Partial<AiGenerationConfig> | null>(null, {
         alias: 'aiGeneration'
     });
 
-    readonly generationConfigKebab = input<Partial<GenerationConfig> | null>(
+    readonly generationConfigKebab = input<Partial<AiGenerationConfig> | null>(
         null,
         {alias: 'ai-generation'}
     );
@@ -68,7 +68,7 @@ export class AiPromptDirective extends PromptDirectiveBase<RequestOptions> {
                 request,
                 {
                     onUpdate: (content): void => {
-                        if (this.isAborted(controller))  return;
+                        if (this.isAborted(controller)) return;
                         this.renderResult(content, options);
                     }
                 },

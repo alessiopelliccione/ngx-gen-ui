@@ -5,7 +5,7 @@
 <h1 align="center">ngx-gen-ui</h1>
 
 <p align="center">
-  Stream Firebase Vertex AI responses straight into Angular templates.
+  Stream AI responses straight into Angular templates – Firebase adapter included by default.
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
   </a>
   <br/>
   <a href="https://angular.dev/" target="_blank"><strong>Angular</strong></a> ·
-  <a href="https://firebase.google.com/products/vertex-ai" target="_blank"><strong>Firebase Vertex AI</strong></a>
+  <a href="https://firebase.google.com/products/vertex-ai" target="_blank"><strong>Firebase Vertex AI adapter</strong></a>
 </p>
 
 ---
@@ -33,7 +33,7 @@
 
 This monorepo ships two projects:
 
-- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective`, `AiStructuredPromptDirective`, and the reusable `PromptEngineService` for working with Firebase Vertex AI.
+- `projects/ngx-gen-ui`: a publishable Angular library exposing `AiPromptDirective`, `AiStructuredPromptDirective`, and the reusable `PromptEngineService`. The core is provider-agnostic and ships with a Firebase adapter.
 - `projects/demo`: a showcase app demonstrating different prompt scenarios using the library.
 
 The library focuses on lightweight integration and reactive streaming, making it simple to drop AI-powered text into any Angular view.
@@ -43,7 +43,8 @@ The library focuses on lightweight integration and reactive streaming, making it
 ## Features
 
 - **Streamlined setup** — Add a directive, pass a prompt, watch content stream in real time.
-- **Configurable generation** — Tweak models, temperature, and more via `GenerationConfig`.
+- **Configurable generation** — Tweak models, temperature, and more via `AiGenerationConfig`.
+- **Adapter friendly** — Implement `AiAdapter` to hook up any AI backend when Firebase is not required.
 - **Safe rendering** — Opt-in HTML rendering with guards for trusted content.
 - **Structured responses** — Let the AI return schema-validated markup (for example `{ "tag": "h1", "content": "Title" }`) and render it instantly.
 - **Layout guides** — Describe the element structure in TypeScript and let the directive enforce it via dynamic JSON schemas.
@@ -60,19 +61,19 @@ The library focuses on lightweight integration and reactive streaming, making it
 npm install ngx-gen-ui firebase @firebase/ai
 ```
 
-> `firebase` and `@firebase/ai` are peer dependencies required by the service.
+> `firebase` and `@firebase/ai` are only needed when you opt into the Firebase adapter shipped with the library. Custom adapters can drop those peer dependencies entirely.
 
 ### 2. Provide Firebase + Vertex AI credentials
 
 ```ts
 // app.config.ts (Angular 17+ standalone bootstrap)
 import { ApplicationConfig, provideHttpClient } from '@angular/core';
-import { provideAiPromptConfig } from 'ngx-gen-ui';
+import { provideFirebaseAiAdapter } from 'ngx-gen-ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(),
-    provideAiPromptConfig({
+    ...provideFirebaseAiAdapter({
       firebaseOptions: {
         apiKey: 'YOUR_API_KEY',
         projectId: 'YOUR_PROJECT_ID',
@@ -80,7 +81,10 @@ export const appConfig: ApplicationConfig = {
         authDomain: 'YOUR_AUTH_DOMAIN'
       },
       model: 'gemini-2.5-flash-lite', // optional, defaults to gemini-2.5-flash-lite
-      location: 'us-central1' // optional, defaults to us-central1
+      location: 'us-central1', // optional, defaults to us-central1
+      defaultGenerationConfig: {
+        temperature: 0 // applied unless overridden per request
+      }
     })
   ]
 };
@@ -137,13 +141,13 @@ Use the dedicated directive when you want the AI to respond with lightweight HTM
 **Supported bindings**
 
 - `ai-prompt` / `aiPrompt`: prompt string.
-- `[ai-generation]` / `[aiGeneration]`: partial `GenerationConfig` (temperature, model, etc.).
+- `[ai-generation]` / `[aiGeneration]`: partial generation config (temperature, topK, etc.).
 - `ai-stream` / `aiStream`: enable streaming updates.
 
 **Structured directive bindings**
 
 - `ai-structured-prompt` / `aiStructuredPrompt`: prompt string.
-- `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial `GenerationConfig`.
+- `[ai-structured-generation]` / `[aiStructuredGeneration]`: partial generation config.
 - `[ai-structured-layout]` / `[aiStructuredLayout]`: optional TypeScript structure that the model must follow (converted into a JSON schema + prompt instructions).
 
 ### 5. (Optional) Define a custom layout
@@ -216,6 +220,39 @@ import { PromptEngineService } from 'ngx-gen-ui';
 const engine = inject(PromptEngineService);
 const result = await engine.generatePrompt({ prompt: 'Summarise this release note.' });
 ```
+
+### Custom adapters
+
+The core package no longer depends on Firebase. You can wire any AI provider by implementing the `AiAdapter` interface and supplying it through the `AI_ADAPTER` injection token:
+
+```ts
+import { AI_ADAPTER, AiAdapter, AiGenerationConfig } from 'ngx-gen-ui';
+
+const myProviderClient = createProviderClient(); // your integration entry point
+
+class CustomAiAdapter implements AiAdapter {
+  async sendPrompt(prompt: string, config?: Partial<AiGenerationConfig> | null): Promise<string> {
+    // Call your provider SDK and return the generated text
+    return await myProviderClient.generate(prompt, config ?? undefined);
+  }
+
+  async streamPrompt(prompt: string, config?: Partial<AiGenerationConfig> | null) {
+    // Return an async iterator of strings plus a final response promise
+    return {
+      stream: myProviderClient.stream(prompt, config ?? undefined),
+      finalResponse: myProviderClient.final(prompt, config ?? undefined)
+    };
+  }
+}
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: AI_ADAPTER, useClass: CustomAiAdapter }
+  ]
+});
+```
+
+Use `provideAiPromptConfig({ defaultGenerationConfig: { temperature: 0.2 } })` if you want to define app-wide defaults that every adapter can honour.
 
 ---
 

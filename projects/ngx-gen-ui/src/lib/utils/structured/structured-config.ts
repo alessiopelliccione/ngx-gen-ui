@@ -1,10 +1,9 @@
-import {SchemaType, type SchemaRequest} from '@firebase/ai';
-
 import {
     StructuredGenerationConfig,
     StructuredLayoutDefinition,
     StructuredLayoutNode
 } from './structured-types';
+import {AiSchemaRequest, AiSchemaType} from './structured-schema';
 
 const DEFAULT_ATTRIBUTES = [
     'src',
@@ -27,35 +26,35 @@ Return only a valid JSON array. Each item must be an object that describes an HT
 - "attributes": optional object of HTML attributes (for example {"src": "...", "alt": "..."}).
 Do not include explanations or Markdown fences.`;
 
-export const DEFAULT_STRUCTURED_RESPONSE_SCHEMA: SchemaRequest = {
-    type: SchemaType.ARRAY,
+export const DEFAULT_STRUCTURED_RESPONSE_SCHEMA: AiSchemaRequest = {
+    type: AiSchemaType.ARRAY,
     items: {
-        type: SchemaType.OBJECT,
+        type: AiSchemaType.OBJECT,
         properties: {
             tag: {
-                type: SchemaType.STRING,
+                type: AiSchemaType.STRING,
                 description: 'HTML tag name such as h1, p, button, img.'
             },
             content: {
-                type: SchemaType.STRING,
+                type: AiSchemaType.STRING,
                 nullable: true,
                 description: 'Primary text content or value for the element.'
             },
             attributes: {
-                type: SchemaType.OBJECT,
+                type: AiSchemaType.OBJECT,
                 nullable: true,
                 properties: createAttributePropertyMap(DEFAULT_ATTRIBUTES)
             },
             children: {
-                type: SchemaType.ARRAY,
+                type: AiSchemaType.ARRAY,
                 nullable: true,
                 items: {
-                    type: SchemaType.OBJECT,
+                    type: AiSchemaType.OBJECT,
                     properties: {
-                        tag: {type: SchemaType.STRING},
-                        content: {type: SchemaType.STRING, nullable: true},
+                        tag: {type: AiSchemaType.STRING},
+                        content: {type: AiSchemaType.STRING, nullable: true},
                         attributes: {
-                            type: SchemaType.OBJECT,
+                            type: AiSchemaType.OBJECT,
                             nullable: true,
                             properties: createAttributePropertyMap(DEFAULT_ATTRIBUTES)
                         }
@@ -92,26 +91,26 @@ function createStructuredResponseSchema(layout: StructuredLayoutDefinition[]) {
     const tags = Array.from(collectTags(layout));
     const attributes = Array.from(new Set<string>(collectAttributes(layout)));
 
-    const baseSchema = cloneSchema(DEFAULT_STRUCTURED_RESPONSE_SCHEMA) as SchemaRequest;
-    const rootItemSchema = baseSchema.items as SchemaRequest;
-    const rootProperties = (rootItemSchema.properties ?? {}) as Record<string, SchemaRequest>;
+    const baseSchema = cloneSchema(DEFAULT_STRUCTURED_RESPONSE_SCHEMA) as AiSchemaRequest;
+    const rootItemSchema = baseSchema.items as AiSchemaRequest;
+    const rootProperties = (rootItemSchema.properties ?? {}) as Record<string, AiSchemaRequest>;
 
     if (tags.length && rootProperties['tag']) {
-        (rootProperties['tag'] as Record<string, unknown>)['enum'] = tags;
+        rootProperties['tag'].enum = tags;
     }
 
     if (attributes.length) {
         const attributeTargets = [
             extractAttributeProperties(rootItemSchema),
-            extractAttributeProperties(rootProperties['children']?.items as SchemaRequest | undefined)
-        ].filter(Boolean) as Array<Record<string, SchemaRequest>>;
+            extractAttributeProperties(rootProperties['children']?.items as AiSchemaRequest | undefined)
+        ].filter(Boolean) as Array<Record<string, AiSchemaRequest>>;
 
         for (const propertyMap of attributeTargets) {
             for (const attribute of attributes) {
                 const normalized = attribute === 'aria-label' ? 'ariaLabel' : attribute;
                 if (!propertyMap[normalized]) {
                     propertyMap[normalized] = {
-                        type: SchemaType.STRING,
+                        type: AiSchemaType.STRING,
                         nullable: true
                     };
                 }
@@ -122,28 +121,28 @@ function createStructuredResponseSchema(layout: StructuredLayoutDefinition[]) {
     return baseSchema;
 }
 
-function createAttributePropertyMap(attributes: readonly string[]): Record<string, SchemaRequest> {
-    const map: Record<string, SchemaRequest> = {};
+function createAttributePropertyMap(attributes: readonly string[]): Record<string, AiSchemaRequest> {
+    const map: Record<string, AiSchemaRequest> = {};
     for (const attribute of attributes) {
         const normalized = attribute === 'aria-label' ? 'ariaLabel' : attribute;
         map[normalized] = {
-            type: SchemaType.STRING,
+            type: AiSchemaType.STRING,
             nullable: true
         };
     }
     return map;
 }
 
-function extractAttributeProperties(schema?: SchemaRequest): Record<string, SchemaRequest> | undefined {
-    if (!schema || schema.type !== SchemaType.OBJECT) {
+function extractAttributeProperties(schema?: AiSchemaRequest): Record<string, AiSchemaRequest> | undefined {
+    if (!schema || schema.type !== AiSchemaType.OBJECT) {
         return undefined;
     }
-    const properties = schema.properties as Record<string, SchemaRequest> | undefined;
+    const properties = schema.properties as Record<string, AiSchemaRequest> | undefined;
     const attributesSchema = properties?.['attributes'];
-    if (!attributesSchema || attributesSchema.type !== SchemaType.OBJECT) {
+    if (!attributesSchema || attributesSchema.type !== AiSchemaType.OBJECT) {
         return undefined;
     }
-    return attributesSchema.properties as Record<string, SchemaRequest> | undefined;
+    return attributesSchema.properties as Record<string, AiSchemaRequest> | undefined;
 }
 
 function collectTags(layout: StructuredLayoutDefinition[]): Set<string> {

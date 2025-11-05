@@ -13,3 +13,5 @@ export {
     StructuredLayoutDefinition,
     StructuredLayoutNode
 } from './structured/structured-types';
+
+export {AiSchemaRequest, AiSchemaType} from './structured/structured-schema';

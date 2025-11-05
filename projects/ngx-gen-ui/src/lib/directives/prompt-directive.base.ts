@@ -5,17 +5,17 @@ import {
     effect,
     inject
 } from '@angular/core';
-import {GenerationConfig} from '@firebase/ai';
 
 import {
     PromptEngineService,
     PromptRequestOptions,
     PromptSignatureOptions
 } from '../services/prompt-engine.service';
+import {AiGenerationConfig} from '../services/ai-adapter';
 
 export interface PromptDirectiveBaseOptions {
     prompt: string | null;
-    config: Partial<GenerationConfig> | null;
+    config: Partial<AiGenerationConfig> | null;
 }
 
 export abstract class PromptDirectiveBase<TOptions extends PromptDirectiveBaseOptions> {

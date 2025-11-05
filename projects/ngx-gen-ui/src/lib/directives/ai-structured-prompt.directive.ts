@@ -1,5 +1,4 @@
 import {Directive, computed, input} from '@angular/core';
-import {GenerationConfig} from '@firebase/ai';
 
 import {
     PromptDirectiveBase,
@@ -15,6 +14,7 @@ import {
     renderStructuredData,
     StructuredLayoutDefinition
 } from '../utils/structured-data.utils';
+import {AiGenerationConfig} from '../services/ai-adapter';
 
 interface StructuredRequestOptions extends PromptDirectiveBaseOptions {
     layout: StructuredLayoutDefinition[] | null;
@@ -29,11 +29,11 @@ export class AiStructuredPromptDirective extends PromptDirectiveBase<StructuredR
 
     readonly kebabPrompt = input('', {alias: 'ai-structured-prompt'});
 
-    readonly camelGeneration = input<Partial<GenerationConfig> | null>(null, {
+    readonly camelGeneration = input<Partial<AiGenerationConfig> | null>(null, {
         alias: 'aiStructuredGeneration'
     });
 
-    readonly kebabGeneration = input<Partial<GenerationConfig> | null>(
+    readonly kebabGeneration = input<Partial<AiGenerationConfig> | null>(
         null,
         {alias: 'ai-structured-generation'}
     );
