@@ -208,6 +208,7 @@ const ATTRIBUTE_KEYS = new Set([
     'href',
     'target',
     'rel',
+    'style',
     'class',
     'id',
     'role',

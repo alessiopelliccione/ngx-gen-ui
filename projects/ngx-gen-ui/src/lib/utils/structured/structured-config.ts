@@ -11,6 +11,7 @@ const DEFAULT_ATTRIBUTES = [
     'href',
     'target',
     'rel',
+    'style',
     'class',
     'id',
     'role',
